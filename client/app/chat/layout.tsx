@@ -3,7 +3,7 @@
 import { useContext } from 'react'
 import { DrawerContext } from '../context/DrawerProvider'
 
-import LeftDrawer from './_components/LeftDrawer'
+import LeftDrawer from '../components/LeftDrawer'
 
 export default function Drawer({ children }: { children: React.ReactNode }) {
   const { leftDrawer, rightDrawer, setLeftDrawer, setRightDrawer } =

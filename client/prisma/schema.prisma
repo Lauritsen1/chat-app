@@ -16,18 +16,25 @@ datasource db {
 }
 
 model User {
-  id                 String     @id @default(uuid())
-  name               String?
-  messagesSent       Message[]  @relation("SentMessages")
-  messagesReceived   Message[]  @relation("ReceivedMessages")
+  id                 String   @id @default(uuid())
+  username           String?
+  imageUrl           String?
 }
 
-model Message {
-  id                 String     @id @default(uuid())
-  content            String
-  sender             User       @relation("SentMessages", fields: [senderId], references: [id])
-  senderId           String
-  receiver           User       @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  receiverId         String
-  createdAt          DateTime   @default(now())
-}
+// model Message {
+//   id                 String     @id @default(uuid())
+//   content            String
+//   sender             User       @relation("SentMessages", fields: [senderId], references: [id])
+//   senderId           String
+//   receiver           User       @relation("ReceivedMessages", fields: [receiverId], references: [id])
+//   receiverId         String
+//   createdAt          DateTime   @default(now())
+// }
+
+// model User {
+//   id                 String   @id @default(uuid())
+//   username           String
+//   imageUrl           String
+//   messagesSent       Message[]  @relation("SentMessages")
+//   messagesReceived   Message[]  @relation("ReceivedMessages")
+// }

@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState, useContext, EventHandler } from 'react'
+import { useEffect, useRef, useState, useContext } from 'react'
 import { DrawerContext } from '../context/DrawerProvider'
 
-import { Message } from '@/lib/types'
+import { Message } from '@/app/lib/types'
 
-import ChatBubble from '@/components/ChatBubble'
+import ChatBubble from '@/app/components/ChatBubble'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane, faBars, faUser } from '@fortawesome/free-solid-svg-icons'
