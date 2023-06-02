@@ -1,9 +1,26 @@
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear } from '@fortawesome/free-solid-svg-icons'
 
+interface User {
+  id: number
+  username: string
+  imageUrl: string
+}
+
 export default function Chat() {
+  const [users, setUsers] = useState<User[]>([])
+
+  useEffect(() => {
+    const apiUrl = `${window.location.origin}/api/users`
+
+    fetch(apiUrl)
+      .then((res) => res.json())
+      .then((data) => setUsers(data))
+  }, [])
+
   return (
     <div className='flex flex-col h-full'>
       <div className='tabs tabs-boxed bg-transparent flex justify-center p-3'>
@@ -12,17 +29,17 @@ export default function Chat() {
       </div>
 
       <ul className='px-4 overflow-scroll h-full'>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <li key={i} className='p-2 rounded-lg hover:bg-base-content/20'>
+        {users.map((user) => (
+          <li key={user.id} className='p-2 rounded-lg hover:bg-base-content/20'>
             <Link href='/chat'>
               <div className='flex items-center gap-2'>
                 <div className='online avatar'>
                   <div className='w-8 h-8 rounded-full'>
-                    <img src='https://images.unsplash.com/photo-1627087820883-7a102b79179a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80' />
+                    <img src={user.imageUrl} />
                   </div>
                 </div>
                 <div className='flex flex-col justify-between text-base-content'>
-                  <span className='text-sm font-semibold'>Obi-Wan Kenobi</span>
+                  <span className='text-sm font-semibold'>{user.username}</span>
                   <span className='text-sm'>Lorem ipsum dolor sit.</span>
                 </div>
               </div>
