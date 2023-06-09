@@ -19,6 +19,14 @@ io.on('connection', (socket) => {
       socket.to(room).emit('receive-message', message)
     }
   })
+
+  socket.on('join-room', (room) => {
+    socket.join(room)
+  })
+
+  socket.on('leave-room', (room) => {
+    socket.leave(room)
+  })
 })
 
 server.listen(3001, () => {
