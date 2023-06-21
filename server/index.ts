@@ -13,11 +13,7 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
   socket.on('send-message', (message, room) => {
-    if (!room) {
-      socket.broadcast.emit('receive-message', message)
-    } else {
-      socket.to(room).emit('receive-message', message)
-    }
+    io.to(room).emit('receive-message', message)
   })
 
   socket.on('join-room', (room) => {
