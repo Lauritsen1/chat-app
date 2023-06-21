@@ -34,7 +34,7 @@ export default function Chat({ params }: { params: { id: string } }) {
   const sendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    const testMessage = {
+    const newMessage = {
       sender: user?.id,
       receiver: params.id,
       name: user?.username,
@@ -42,7 +42,7 @@ export default function Chat({ params }: { params: { id: string } }) {
     }
 
     // setReceivedMessages([...receivedMessages, testMessage])
-    socket.current.emit('send-message', testMessage, room)
+    socket.current.emit('send-message', newMessage, room)
     setCurrentMessage('')
   }
 
