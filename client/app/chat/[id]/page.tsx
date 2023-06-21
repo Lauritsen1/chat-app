@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState, useContext } from 'react'
-import { DrawerContext } from '../context/DrawerProvider'
+import { DrawerContext } from '../../context/DrawerProvider'
 
-import { Message } from '@/app/lib/types'
+import { useUser } from '@clerk/nextjs'
+
+import { MessageType } from '@/app/lib/types'
 
 import ChatBubble from '@/app/components/ChatBubble'
 
@@ -11,33 +13,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane, faBars, faUser } from '@fortawesome/free-solid-svg-icons'
 
 import { io } from 'socket.io-client'
-const socket = io('http://localhost:3001')
 
-const data = [
-  {
-    id: 1,
-    name: 'Obi-Wan Kenobi',
-    content: 'You were the Chosen One!',
-    time: '12:45',
-    imageUrl:
-      'https://images.unsplash.com/photo-1627087820883-7a102b79179a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    isMine: false,
-  },
-  {
-    id: 2,
-    name: 'Anakin Skywalker',
-    content: 'I hate you!',
-    time: '12:46',
-    imageUrl:
-      'https://images.unsplash.com/photo-1618747946260-9511b46b1ac7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=718&q=80',
-    isMine: true,
-  },
-]
+export default function Chat({ params }: { params: { id: string } }) {
+  // User state
+  const { user } = useUser()
 
-export default function Chat() {
+  // Messages state
   const [currentMessage, setCurrentMessage] = useState<string>('')
-  const [messages, setMessages] = useState<Message[]>(data)
+  const [receivedMessages, setReceivedMessages] = useState<MessageType[]>([])
+
+  // Room state
+  const [room, setRoom] = useState<string>('')
+
   const messageContainerRef = useRef<HTMLDivElement>(null)
+  const socket = useRef<any>(null)
 
   const { leftDrawer, rightDrawer, setLeftDrawer, setRightDrawer } =
     useContext(DrawerContext)
@@ -45,38 +34,44 @@ export default function Chat() {
   const sendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    const message: Message = {
-      id: Math.floor(Math.random() * 100),
-      name: 'Obi-Wan Kenobi',
+    const testMessage = {
+      sender: user?.id,
+      receiver: params.id,
+      name: user?.username,
       content: currentMessage,
-      time: '12:45',
-      imageUrl:
-        'https://images.unsplash.com/photo-1627087820883-7a102b79179a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-      isMine: true,
     }
 
-    setMessages([...messages, message])
-    socket.emit('send-message', message)
+    // setReceivedMessages([...receivedMessages, testMessage])
+    socket.current.emit('send-message', testMessage, room)
     setCurrentMessage('')
   }
 
+  const receiveMessage = (message: MessageType) => {
+    console.log('received message', message)
+
+    setReceivedMessages([...receivedMessages, message])
+  }
+
   useEffect(() => {
+    socket.current = io('http://localhost:3001')
+
     if (messageContainerRef.current) {
       messageContainerRef.current.scrollTop =
         messageContainerRef.current.scrollHeight
     }
 
-    const receiveMessage = (message: Message) => {
-      setMessages((prevMessages) => [...prevMessages, message])
+    if (user) {
+      const roomId = [params.id, user.id].sort().join('-')
+      setRoom(roomId)
+      socket.current.emit('join-room', room)
     }
 
-    socket.on('receive-message', receiveMessage)
+    socket.current.on('receive-message', receiveMessage)
 
     return () => {
-      socket.off('receive-message', receiveMessage)
-      socket.disconnect()
+      socket.current.emit('leave-room', room)
     }
-  }, [])
+  }, [user, room, receivedMessages])
 
   return (
     <main className='h-screen'>
@@ -115,8 +110,8 @@ export default function Chat() {
         </div>
         {/* Message container */}
         <div className='grow overflow-y-scroll p-4' ref={messageContainerRef}>
-          {messages.map((message) => (
-            <ChatBubble key={message.id} message={message} />
+          {receivedMessages.map((receivedMessage, i) => (
+            <ChatBubble key={i} message={receivedMessage} />
           ))}
         </div>
         {/* Input container */}
